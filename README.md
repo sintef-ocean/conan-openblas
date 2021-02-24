@@ -61,7 +61,7 @@ This recipe is based on the openblas recipe found on conan center.
 
 Option | Default | Domain
 ---|---|---
-shared | True | [True, False]
+shared | False | [True, False]
 fPIC | True | [True, False] (ignored)
 build_lapack | True | [True, False]
 use_thread | True | [True, False]

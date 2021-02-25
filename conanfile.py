@@ -33,7 +33,7 @@ class OpenblasConan(ConanFile):
         "fPIC": True,
         "build_lapack": True,
         "use_thread": True,
-        "dynamic_arch": False  #  True failed for me
+        "dynamic_arch": False
     }
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
@@ -94,8 +94,13 @@ class OpenblasConan(ConanFile):
         cmake_config.append('-DDYNAMIC_ARCH="{}"'.format(self.options.dynamic_arch))
         cmake_config.append('-DUSE_THREAD="{}"'.format(self.options.use_thread))
         cmake_config.append('-DUSE_LOCKING="{}"'.format(self.options.use_thread)) # Required for safe concurrent calls to OpenBLAS routines
-        #cmake_config.append('-DMSVC_STATIC_CRT="False"')  # don't, may lie to consumer, /MD or /MT is managed by conan
-        cmake_config.append('-DNO_AVX512=1')
+        cmake_config.append('-DMSVC_STATIC_CRT="False"')  # don't, may lie to consumer, /MD or /MT is managed by conan
+        cmake_config.append('-DNO_AVX512=ON')
+        if self.options.dynamic_arch:
+            cmake_config.append('-DDYNAMIC_LIST="CORE2;NEHALEM;BARCELONA;SANDYBRIDGE;BULLDOZER;PILEDRIVER;STEAMROLLER;EXCAVATOR;HASWELL;ZEN"')
+        cmake_config.append('-DCMAKE_CXX_FLAGS="/{}"'.format(self.settings.compiler.runtime))
+        cmake_config.append('-DCMAKE_C_FLAGS="/{}"'.format(self.settings.compiler.runtime))
+        cmake_config.append('-Wno-dev')
         what = " ".join(cmake_config)
 
         with self._build_context():

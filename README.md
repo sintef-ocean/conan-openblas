@@ -70,4 +70,6 @@ dynamic_arch | False | [True, False]
 
 ## Known recipe issues
 
-- The recipe developer has set `NO_AVX512=1` to be able to compile with option `dynamic_arch=True`. `COOPERLAKE`and `SKYLAKEX` will not be built.
+- The recipe developer has set `NO_AVX512=1` to be able to compile with option `dynamic_arch=True`.
+`COOPERLAKE`and `SKYLAKEX`. The variable `DYNAMIC_LIST` is set to the `DYNAMIC_CORE` default list without those included with `DYNAMIC_OLDER`.
+- Only `x86_64` arch is supported

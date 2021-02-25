@@ -70,4 +70,4 @@ dynamic_arch | False | [True, False]
 
 ## Known recipe issues
 
-- The recipe developer has modified `cmake/system.cmake` to be able to compile with option `dynamic_arch=True`. This may have implications for `COOPERLAKE` architecture.
+- The recipe developer has set `NO_AVX512=1` to be able to compile with option `dynamic_arch=True`. `COOPERLAKE`and `SKYLAKEX` will not be built.

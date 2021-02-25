@@ -69,26 +69,6 @@ class OpenblasConan(ConanFile):
             branch="v{}".format(self.version),
             shallow=True)
 
-        # Hackish way of allowing dynamic_arch, may have implications for COOPERLAKE?
-        # see master branch for latest changes
-        if self.version == "0.3.13":
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "cmake", "system.cmake"),
-                "#    if (${CMAKE_C_COMPILER_ID}",
-                "    if (${CMAKE_C_COMPILER_ID}")
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "cmake", "system.cmake"),
-                '#    elseif (${CMAKE_C_COMPILER_ID} STREQUAL "CLANG")',
-                '    elseif (${CMAKE_C_COMPILER_ID} STREQUAL "CLANG")')
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "cmake", "system.cmake"),
-                '#      set (KERNEL_DEFINITIONS "${KERNEL_DEFINITIONS} -mavx2")',
-                '      set (KERNEL_DEFINITIONS "${KERNEL_DEFINITIONS} -mavx2")')
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "cmake", "system.cmake"),
-                '#    endif()',
-                '    endif()')
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -115,6 +95,7 @@ class OpenblasConan(ConanFile):
         cmake_config.append('-DUSE_THREAD="{}"'.format(self.options.use_thread))
         cmake_config.append('-DUSE_LOCKING="{}"'.format(self.options.use_thread)) # Required for safe concurrent calls to OpenBLAS routines
         #cmake_config.append('-DMSVC_STATIC_CRT="False"')  # don't, may lie to consumer, /MD or /MT is managed by conan
+        cmake_config.append('-DNO_AVX512=1')
         what = " ".join(cmake_config)
 
         with self._build_context():

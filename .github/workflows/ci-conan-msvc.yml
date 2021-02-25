@@ -27,7 +27,7 @@ jobs:
         build_type: [Debug, Release]
         compiler_version: [16]
         package_version: [0.3.13]
-        shared: [True, False]
+        shared: ["True", "False"]
     steps:
       - uses: actions/checkout@v2
       - name: Install prerequisites

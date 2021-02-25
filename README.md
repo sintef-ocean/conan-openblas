@@ -29,6 +29,7 @@ This recipe is based on the openblas recipe found on conan center.
    [options]
    openblas:shared=True
    openblas:build_lapack=True
+   openblas:dynamic_arch=True
 
    [imports]
    licenses, * -> ./licenses @ folder=True
@@ -69,4 +70,4 @@ dynamic_arch | False | [True, False]
 
 ## Known recipe issues
 
-- The recipe developer has not been able to compile with option `dynamic_arch=True`. As such, no binary package is uploaded
+- The recipe developer has modified `cmake/system.cmake` to be able to compile with option `dynamic_arch=True`. This may have implications for `COOPERLAKE` architecture.

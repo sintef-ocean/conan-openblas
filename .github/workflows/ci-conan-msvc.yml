@@ -4,7 +4,6 @@ name: MSVC Conan
 on: [push]
 
 env:
-  PACKAGE_VERSION: 0.3.13
   SINTEF_REFERENCE: "openblas*"
   SINTEF_CONAN_CLASS: "OpenblasConan"
   CONAN_UPLOAD: "https://api.bintray.com/conan/sintef-ocean/conan"
@@ -27,6 +26,7 @@ jobs:
         os: [windows-2019]
         build_type: [Debug, Release]
         compiler_version: [16]
+        package_version: [0.3.13]
 
     steps:
       - uses: actions/checkout@v2
@@ -41,10 +41,11 @@ jobs:
         run: |
           conan create -s build_type=${{ matrix.build_type }} `
             -s compiler.version=${{ matrix.compiler_version }} `
-            -b missing -b outdated . ${env:PACKAGE_VERSION}@sintef/testing
+            -o openblas:dynamic_arch=True `
+            -b missing -b outdated . ${{ matrix.package_version }}@sintef/testing
       - name: Conan upload
         run: |
-          conan upload -c -r sintef ${env:SINTEF_REFERENCE} --retry 10 --retry-wait 20 --force
+          conan upload --all -c -r sintef ${env:SINTEF_REFERENCE} --retry 10 --retry-wait 20 --force
       - name: Bintray info
         run: |
           python bintray.py ${env:SINTEF_CONAN_CLASS} `

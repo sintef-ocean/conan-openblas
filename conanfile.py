@@ -69,37 +69,62 @@ class OpenblasConan(ConanFile):
             branch="v{}".format(self.version),
             shallow=True)
 
+        # Hackish way of allowing dynamic_arch, may have implications for COOPERLAKE?
+        # see master branch for latest changes
+        if self.version == "0.3.13":
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "cmake", "system.cmake"),
+                "#    if (${CMAKE_C_COMPILER_ID}",
+                "    if (${CMAKE_C_COMPILER_ID}")
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "cmake", "system.cmake"),
+                '#    elseif (${CMAKE_C_COMPILER_ID} STREQUAL "CLANG")',
+                '    elseif (${CMAKE_C_COMPILER_ID} STREQUAL "CLANG")')
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "cmake", "system.cmake"),
+                '#      set (KERNEL_DEFINITIONS "${KERNEL_DEFINITIONS} -mavx2")',
+                '      set (KERNEL_DEFINITIONS "${KERNEL_DEFINITIONS} -mavx2")')
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "cmake", "system.cmake"),
+                '#    endif()',
+                '    endif()')
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
-        cmake = CMake(self)
+
+        build_config = "--config {}".format(self.settings.build_type)
+
+        cmake_config = []
+        cmake_config.append('-G "Ninja"')
+        cmake_config.append('-DBUILD_SHARED_LIBS={}'.format(self.options.shared))
+        cmake_config.append('-DCMAKE_INSTALL_PREFIX="{}"'.format(self.package_folder))
+        cmake_config.append('-DCMAKE_INSTALL_BINDIR="bin"')
+        cmake_config.append('-DCMAKE_INSTALL_SBINDIR="bin"')
+        cmake_config.append('-DCMAKE_INSTALL_LIBEXECDIR="bin"')
+        cmake_config.append('-DCMAKE_INSTALL_LIBDIR="lib"')
+        cmake_config.append('-DCMAKE_INSTALL_INCLUDEDIR="include"')
+        cmake_config.append('-DCMAKE_INSTALL_DATAROOTDIR="share"')
+        cmake_config.append('-DCMAKE_EXPORT_NO_PACKAGE_REGISTRY="ON"')
         if self.options.build_lapack:
-            self.output.warn("Building with lapack support requires a Fortran compiler.")
-            cmake.definitions["CMAKE_Fortran_COMPILER"] = "flang"
-            cmake.definitions["CMAKE_C_COMPILER"] = "clang-cl"
+            cmake_config.append('-DCMAKE_Fortran_COMPILER="flang"')
+            cmake_config.append('-DCMAKE_C_COMPILER="clang-cl"')
+        cmake_config.append('-DNOFORTRAN="{}"'.format(not self.options.build_lapack))
+        cmake_config.append('-DBUILD_WITHOUT_LAPACK="{}"'.format(not self.options.build_lapack))
+        cmake_config.append('-DDYNAMIC_ARCH="{}"'.format(self.options.dynamic_arch))
+        cmake_config.append('-DUSE_THREAD="{}"'.format(self.options.use_thread))
+        cmake_config.append('-DUSE_LOCKING="{}"'.format(self.options.use_thread)) # Required for safe concurrent calls to OpenBLAS routines
+        #cmake_config.append('-DMSVC_STATIC_CRT="False"')  # don't, may lie to consumer, /MD or /MT is managed by conan
+        what = " ".join(cmake_config)
 
-        cmake.definitions["NOFORTRAN"] = not self.options.build_lapack
-        cmake.definitions["BUILD_WITHOUT_LAPACK"] = not self.options.build_lapack
-        cmake.definitions["DYNAMIC_ARCH"] = self.options.dynamic_arch
-        cmake.definitions["USE_THREAD"] = self.options.use_thread
-
-        # Required for safe concurrent calls to OpenBLAS routines
-        cmake.definitions["USE_LOCKING"] = not self.options.use_thread
-        cmake.definitions["MSVC_STATIC_CRT"] = False # don't, may lie to consumer, /MD or /MT is managed by conan
-
-        # lazy hack to resuse flags setup by conan (some are wrong)
-        what = cmake.command_line
-        what = what.replace('-T "ClangCL"', '')
-        what = re.sub('-G "Visual Studio .*-A "x64"', '-G "Ninja"', what)
-       
         with self._build_context():
             self.run('conda activate && cmake %s %s' % (
                 os.path.join(self.source_folder, self._source_subfolder), what))
 
         self._cmake = dict()
-        self._cmake['cmake'] = cmake
-        self._cmake['build_cmd'] = "conda activate && cmake --build . %s" % cmake.build_config
-        self._cmake['install_cmd'] = 'conda activate && cmake --build . --target install %s' % cmake.build_config
+        #self._cmake['cmake'] = cmake
+        self._cmake['build_cmd'] = "conda activate && cmake --build . {}".format(build_config)
+        self._cmake['install_cmd'] = 'conda activate && cmake --build . --target install {}'.format(build_config)
 
         return self._cmake
 

@@ -1,8 +1,8 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
-import re
+
 
 class OpenblasConan(ConanFile):
     name = "openblas"
@@ -16,10 +16,10 @@ class OpenblasConan(ConanFile):
         "lapack"
     )
     settings = {
-        "os" : ["Windows"],
-        "compiler" : ["Visual Studio"],
-        "build_type" : ["Debug", "Release"],
-        "arch" : ["x86_64"]
+        "os": ["Windows"],
+        "compiler": ["Visual Studio"],
+        "build_type": ["Debug", "Release"],
+        "arch": ["x86_64"]
     }
     options = {
         "shared": [True, False],
@@ -66,8 +66,8 @@ class OpenblasConan(ConanFile):
     def source(self):
         _git = tools.Git(folder=self._source_subfolder)
         _git.clone("https://github.com/xianyi/OpenBLAS.git",
-            branch="v{}".format(self.version),
-            shallow=True)
+                   branch="v{}".format(self.version),
+                   shallow=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -108,7 +108,7 @@ class OpenblasConan(ConanFile):
                 os.path.join(self.source_folder, self._source_subfolder), what))
 
         self._cmake = dict()
-        #self._cmake['cmake'] = cmake
+        # self._cmake['cmake'] = cmake
         self._cmake['build_cmd'] = "conda activate && cmake --build . {}".format(build_config)
         self._cmake['install_cmd'] = 'conda activate && cmake --build . --target install {}'.format(build_config)
 
@@ -127,7 +127,7 @@ class OpenblasConan(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         with self._build_context():
-            self.run(cmake['install_cmd'])#, cwd=self._build_subfolder)
+            self.run(cmake['install_cmd']) #, cwd=self._build_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 

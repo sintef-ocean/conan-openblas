@@ -1,10 +1,8 @@
 [![MSVC Conan](https://github.com/sintef-ocean/conan-openblas/workflows/MSVC%20Conan/badge.svg)](https://github.com/sintef-ocean/conan-openblas/actions?query=workflow%3A"MSVC+Conan")
-[![Download](https://api.bintray.com/packages/sintef-ocean/conan/openblas%3Asintef/images/download.svg)](https://bintray.com/sintef-ocean/conan/openblas%3Asintef/_latestVersion)
 
 
 [Conan.io](https://conan.io) recipe for [openblas](https://www.openblas.net/).
 
-The recipe builds library packages, which might be found at [Bintray](https://bintray.com/sintef-ocean/conan/openblas%3Asintef).
 The package is usually consumed using the `conan install` command or a *conanfile.txt*.
 *Note* This recipe is handcrafted to compile OpenBLAS on Windows with LAPACK, with native support for MSVC. It follows instructions given here: [OpenBLAS MSVC](https://github.com/xianyi/OpenBLAS/wiki/How-to-use-OpenBLAS-in-Microsoft-Visual-Studio).
 Under normal circumstances you should use OpenBLAS recipe on [Conan center](https://conan.io/center/openblas)
@@ -15,7 +13,7 @@ This recipe is based on the openblas recipe found on conan center.
 1. Add remote to conan's package [remotes](https://docs.conan.io/en/latest/reference/commands/misc/remote.html?highlight=remotes):
 
    ```bash
-   $ conan remote add sintef https://api.bintray.com/conan/sintef-ocean/conan
+   $ conan remote add sintef https://conan.sintef.io/public
    ```
 
 2. Using *conanfile.txt* in your project with *cmake*
@@ -24,7 +22,7 @@ This recipe is based on the openblas recipe found on conan center.
 
    ```
    [requires]
-   openblas/[>=0.3.13]@sintef/testing
+   openblas/[>=0.3.15]@sintef/testing
 
    [options]
    openblas:shared=True

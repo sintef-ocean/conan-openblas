@@ -95,6 +95,7 @@ class OpenblasConan(ConanFile):
         cmake_config.append('-DUSE_THREAD="{}"'.format(self.options.use_thread))
         cmake_config.append('-DUSE_LOCKING="{}"'.format(self.options.use_thread)) # Required for safe concurrent calls to OpenBLAS routines
         cmake_config.append('-DMSVC_STATIC_CRT="False"')  # don't, may lie to consumer, /MD or /MT is managed by conan
+        cmake_config.append('-DCMAKE_MT=mt') # Must be set to compile with CMake 3.20. Unknown implications..
         cmake_config.append('-DNO_AVX512=ON')
         if self.options.dynamic_arch:
             cmake_config.append('-DDYNAMIC_LIST="CORE2;NEHALEM;BARCELONA;SANDYBRIDGE;BULLDOZER;PILEDRIVER;STEAMROLLER;EXCAVATOR;HASWELL;ZEN"')

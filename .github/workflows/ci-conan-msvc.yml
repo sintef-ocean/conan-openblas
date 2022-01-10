@@ -22,17 +22,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2019]
+        os: [windows-2022]
         build_type: [Debug, Release]
-        compiler_version: [16]
-        package_version: [0.3.15]
+        compiler_version: [17]
+        package_version: [0.3.19]
         shared: ["True", "False"]
     steps:
       - uses: actions/checkout@v2
       - name: Install prerequisites
         run: |
-          pip3 install --upgrade setuptools pip
-          pip3 install conan requests
+          pip3 install --upgrade setuptools pip requests
+          pip3 install --upgrade conan
       - name: Configure Conan
         run: |
           conan remote add sintef ${env:CONAN_UPLOAD} --insert 0
@@ -40,6 +40,7 @@ jobs:
         run: |
           conan create -s build_type=${{ matrix.build_type }} `
             -s compiler.version=${{ matrix.compiler_version }} `
+            -s compiler="Visual Studio" `
             -o openblas:dynamic_arch=True `
             -o openblas:shared=${{ matrix.shared }} `
             -b missing -b outdated . ${{ matrix.package_version }}@sintef/testing
